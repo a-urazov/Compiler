@@ -52,12 +52,12 @@ namespace Parsing
         /// <summary>
         /// Prefix parsers
         /// </summary>
-        private Dictionary<Token.Type, Func<Expression>> PrefixParser { get; } = new();
+        private Dictionary<Token.Type, Func<Expression>> LiteralParser { get; } = new();
 
         /// <summary>
         /// Infix parsers
         /// </summary>
-        private Dictionary<Token.Type, Func<Expression, Expression>> InfixParser { get; } = new();
+        private Dictionary<Token.Type, Func<Expression, Expression>> ExpressionParser { get; } = new();
 
         /// <summary>
         /// Priorities
@@ -103,6 +103,7 @@ namespace Parsing
                 else if (PeekedToken == Token.Type.LeftParen)
                 {
                     Next(2);
+                    statement.TypeOf = Statement.Type.Cortege;
                     while (CurrentToken != Token.Type.RightParen)
                     {
                         if (CurrentToken == Token.Type.Comma) 
@@ -117,6 +118,7 @@ namespace Parsing
                         }
                         Next();
                     }
+
                     if (PeekedToken == Token.Type.Assign) Next();
                     else return null;
                     
@@ -145,11 +147,14 @@ namespace Parsing
                 }
                 return statement;
             });
+            StatementParser.Add(Token.Type.Class, () => {
+                return null;
+            });
 
             // Fill prefix parsers
-            PrefixParser.Add(Token.Type.Identifier, () => new Identifier(CurrentToken));
-            PrefixParser.Add(Token.Type.Number, () => new NumberLiteral(CurrentToken));
-            PrefixParser.Add(Token.Type.Function, () =>
+            LiteralParser.Add(Token.Type.Identifier, () => new Identifier(CurrentToken));
+            LiteralParser.Add(Token.Type.Number, () => new NumberLiteral(CurrentToken));
+            LiteralParser.Add(Token.Type.Function, () =>
             {
                 var expression = new FucntionLiteral(CurrentToken);
 
@@ -185,15 +190,41 @@ namespace Parsing
 
                 return expression;
             });
+            LiteralParser.Add(Token.Type.Class, () => {
+                var expression = new ClassLiteral(CurrentToken);
+                if (PeekedToken == Token.Type.Colon) {
+                    Next(2);
+                    while (CurrentToken != Token.Type.LeftBrace) 
+                    {
+                        if (CurrentToken == Token.Type.Comma) 
+                        {
+                            Next();
+                            continue;
+                        }
+                        var identifier = ParseExpression() as Identifier;
+                        if (identifier != null) expression.Inheritances.Add(identifier);
+                        Next();
+                    }
+                }
+                if (CurrentToken == Token.Type.LeftBrace) Next();
+                else return null;
+
+                while (CurrentToken != Token.Type.RightBrace) 
+                {
+                    
+                }
+
+                return expression;
+            });
 
             // Fill infix parsers
-            InfixParser.Add(Token.Type.Assign, ParseBinaryOperator(Token.Type.Assign));
-            InfixParser.Add(Token.Type.Plus, ParseBinaryOperator(Token.Type.Plus));
-            InfixParser.Add(Token.Type.Minus, ParseBinaryOperator(Token.Type.Plus));
-            InfixParser.Add(Token.Type.Astersk, ParseBinaryOperator(Token.Type.Astersk));
-            InfixParser.Add(Token.Type.Slash, ParseBinaryOperator(Token.Type.Slash));
-            InfixParser.Add(Token.Type.Inc, ParseUnaryOperator(Token.Type.Inc));
-            InfixParser.Add(Token.Type.Dec, ParseUnaryOperator(Token.Type.Dec));
+            ExpressionParser.Add(Token.Type.Assign, ParseBinaryOperator(Token.Type.Assign));
+            ExpressionParser.Add(Token.Type.Plus, ParseBinaryOperator(Token.Type.Plus));
+            ExpressionParser.Add(Token.Type.Minus, ParseBinaryOperator(Token.Type.Plus));
+            ExpressionParser.Add(Token.Type.Astersk, ParseBinaryOperator(Token.Type.Astersk));
+            ExpressionParser.Add(Token.Type.Slash, ParseBinaryOperator(Token.Type.Slash));
+            ExpressionParser.Add(Token.Type.Inc, ParseUnaryOperator(Token.Type.Inc));
+            ExpressionParser.Add(Token.Type.Dec, ParseUnaryOperator(Token.Type.Dec));
         }
 
         /// <summary>
@@ -273,13 +304,13 @@ namespace Parsing
         /// <returns>Expression</returns>
         private Expression ParseExpression(OperationPriority priority = OperationPriority.Minimal)
         {
-            if (!PrefixParser.ContainsKey(CurrentToken.T)) return null;
+            if (!LiteralParser.ContainsKey(CurrentToken.T)) return null;
 
-            var expression = PrefixParser[CurrentToken.T].Invoke();
+            var expression = LiteralParser[CurrentToken.T].Invoke();
 
             if (CurrentToken != Token.Type.Semicolon && priority < Priority(PeekedToken.T))
-                if (!InfixParser.ContainsKey(PeekedToken.T)) return expression;
-                else return InfixParser[PeekedToken.T].Invoke(expression);
+                if (!ExpressionParser.ContainsKey(PeekedToken.T)) return expression;
+                else return ExpressionParser[PeekedToken.T].Invoke(expression);
 
             return expression;
         }

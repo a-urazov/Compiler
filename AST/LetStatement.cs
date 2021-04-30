@@ -23,7 +23,9 @@ namespace AST
 
         public IList<Identifier> Names { get; set; } = new List<Identifier>();
 
-        public Dictionary<Identifier, Expression> Values { get; set; } = new Dictionary<Identifier, Expression>();
+        public Dictionary<Identifier, Expression> Values { get; set; } = new();
+
+        public Statement.Type TypeOf { get; set; } = Statement.Type.Single;
 
         /// <summary>
         /// Constructor - let <identifier> = <expression>;
@@ -33,14 +35,19 @@ namespace AST
         {
         }
 
+        private string Open => TypeOf == Statement.Type.Array ? "[" : (TypeOf == Statement.Type.Cortege ? "(" : "");
+        private string Close => TypeOf == Statement.Type.Array ? "]" : (TypeOf == Statement.Type.Cortege ? ")" : "");
+
         /// <summary>
         /// Original constructed source of token by tokens
         /// </summary>
         /// <returns>Source view</returns>
-        public override string Source() => IsCortege() 
-            ? $"{Literal} ({string.Join(", ", Names.Select(x => x.Source()))}) = ({string.Join(", ", Values.Select(x => x.Value.Source()))});" 
+        public override string Source() => IsMany() 
+            ? $"{Literal} {Open}{string.Join(", ", Names.Select(x => x.Source()))}{Close} = {Open}{string.Join(", ", Values.Select(x => x.Value.Source()))}{Close};" 
             : $"{Literal} {Name.Value} = {Value.Source()};";
 
-        private bool IsCortege() => Value == null && Name == null && Names.Count != 0 && Values.Count == Names.Count;
+        private bool IsMany() => 
+            (Value == null && Name == null && Names.Count != 0 && Values.Count == Names.Count) ||
+            (Value != null && Name == null && Names.Count != 0 && Values.Count == 0);
     }
 }

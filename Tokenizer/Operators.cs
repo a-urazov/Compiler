@@ -28,7 +28,7 @@ namespace Tokenizer
         public static Dictionary<Token.Type, string> Literals { get; } = new()
         {
             { Token.Type.Assign, "=" },
-            { Token.Type.SpaceShip, "<=>"},
+            { Token.Type.SpaceShip, "<=>" },
             { Token.Type.Plus, "+" },
             { Token.Type.Inc, "++" },
             { Token.Type.Dec, "--" },
@@ -45,8 +45,9 @@ namespace Tokenizer
             { Token.Type.Dot, "." },
             { Token.Type.Diapason, ".." },
             { Token.Type.Etc, "..." },
-            { Token.Type.Comma, ","},
+            { Token.Type.Comma, "," },
             { Token.Type.Arrow, "=>" },
+            { Token.Type.Colon, ":" },
         };
 
         /// <summary>

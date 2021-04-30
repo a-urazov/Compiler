@@ -169,8 +169,36 @@ namespace Tokenizer
         /// <returns></returns>
         public override string ToString() => $"[{T}:{Literal}]";
 
+        /// <summary>
+        /// Overriden ==operator as helper for conduct types of tokens comparison
+        /// </summary>
+        /// <param name="token">Token</param>
+        /// <param name="type">Type</param>
+        /// <returns>Result comparison of types</returns>
         public static bool operator ==(Token token, Token.Type type) => token.T == type;
 
+        /// <summary>
+        /// Overriden ==operator as helper for conduct types of tokens comparison
+        /// </summary>
+        /// <param name="token">Token</param>
+        /// <param name="type">Type</param>
+        /// <returns>Result comparison of types</returns>
         public static bool operator !=(Token token, Token.Type type) => token.T != type;
+
+        /// <summary>
+        /// Overriden ==operator as helper for conduct types of tokens comparison
+        /// </summary>
+        /// <param name="token">Token</param>
+        /// <param name="type">Type</param>
+        /// <returns>Result comparison of types</returns>
+        public static bool operator ==(Token.Type type, Token token) => type == token.T;
+
+        /// <summary>
+        /// Overriden ==operator as helper for conduct types of tokens comparison
+        /// </summary>
+        /// <param name="token">Token</param>
+        /// <param name="type">Type</param>
+        /// <returns>Result comparison of types</returns>
+        public static bool operator !=(Token.Type type, Token token) => type != token.T;
     }
 }
