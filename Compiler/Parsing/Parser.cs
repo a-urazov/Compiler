@@ -65,7 +65,7 @@ namespace Parsing
             // Fill infix parsers
             ExpressionParser.Add(Token.Type.Assign, ParseBinaryOperatorExpression(Token.Type.Assign));
             ExpressionParser.Add(Token.Type.Plus, ParseBinaryOperatorExpression(Token.Type.Plus));
-            ExpressionParser.Add(Token.Type.Minus, ParseBinaryOperatorExpression(Token.Type.Plus));
+            ExpressionParser.Add(Token.Type.Minus, ParseBinaryOperatorExpression(Token.Type.Minus));
             ExpressionParser.Add(Token.Type.Astersk, ParseBinaryOperatorExpression(Token.Type.Astersk));
             ExpressionParser.Add(Token.Type.Slash, ParseBinaryOperatorExpression(Token.Type.Slash));
             ExpressionParser.Add(Token.Type.Inc, ParseUnaryOperator(Token.Type.Inc));
@@ -131,17 +131,25 @@ namespace Parsing
         /// Parse source code
         /// </summary>
         /// <returns>AST</returns>
-        public Program Parse
+        public AsymptoticTree Parse
         {
             get
             {
-                var program = new Program();
+                var program = new AsymptoticTree();
 
                 while (!CurrentToken.End())
                 {
-                    var statement = ParseStatement ?? ParseExpressionStatement;
-                    if (statement != null) program.Add(statement);
-                    Next();
+                    try
+                    {
+                        var statement = ParseStatement ?? ParseExpressionStatement;
+                        if (statement != null) program.Add(statement);
+                        Next();
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine(e.Message, e.Source);
+                        return new AsymptoticTree();
+                    }
                 }
 
                 return program;

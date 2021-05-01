@@ -7,7 +7,7 @@ namespace AST
     /// <summary>
     /// Program as list of statements
     /// </summary>
-    public sealed class Program : INode
+    public sealed class AsymptoticTree : INode
     {
         /// <summary>
         /// List of program statements
@@ -27,6 +27,17 @@ namespace AST
         /// Make source code from AST
         /// </summary>
         /// <returns></returns>
-        public string Source => Statements.Select(x => x.Source).Aggregate((current, next) => current + next);
+        public string Source => Statements.Select(x =>
+        {
+            try
+            {
+                return x.Source;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.ToString());
+                return "";
+            }
+        }).Aggregate((current, next) => current + next);
     }
 }

@@ -6,8 +6,8 @@ namespace AST
 {
     public sealed class ClassStatement : Statement
     {
-        private static string Open => Keyword.Literals[Token.Type.LeftBrace];
-        private static string Close => Keyword.Literals[Token.Type.RightBrace];
+        private static string Open => Blocks.Literals[Token.Type.LeftBrace];
+        private static string Close => Blocks.Literals[Token.Type.RightBrace];
 
         public Identifier Name { get; set; }
 

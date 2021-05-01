@@ -18,7 +18,7 @@ namespace AST
         /// <param name="token">Token</param>
         public Identifier(Token token) : base(token)
         {
-            Value = Source;
+            Value = Literal;
         }
 
         public override string Source => Value;

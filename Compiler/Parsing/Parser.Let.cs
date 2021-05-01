@@ -17,12 +17,16 @@ namespace Parsing
                 {
                     Next();
 
-                    statement.Name = new Identifier(CurrentToken);
+                    statement.Name = ParseExpression() as Identifier;
 
                     if (PeekedToken == Token.Type.Assign) Next(2);
                     else return null;
 
-                    statement.Value = ParseExpression();
+                    while (CurrentToken != Token.Type.Semicolon)
+                    {
+                        statement.Value = ParseExpression();
+                        Next();
+                    }
 
                     if (typeof(FucntionLiteral).IsInstanceOfType(statement.Value)) (statement.Value as FucntionLiteral).Name = statement.Name;
                 }

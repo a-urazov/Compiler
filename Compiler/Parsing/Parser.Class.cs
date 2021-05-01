@@ -29,10 +29,11 @@ namespace Parsing
                 if (CurrentToken == Token.Type.LeftBrace) Next();
                 else return null;
 
-                var Access = ClassMember.Qualifier.Private;
-                var Static = ClassMember.Qualifier.None;
-                var Const = ClassMember.Qualifier.None;
-                var Async = ClassMember.Qualifier.None;
+                var qualifier = (
+                    Access: Qualifier.Type.Private,
+                    Static: Qualifier.Type.None,
+                    Async: Qualifier.Type.None
+                );
 
                 while (CurrentToken != Token.Type.RightBrace)
                 {
@@ -41,22 +42,19 @@ namespace Parsing
                         case Token.Type.EndOfFile:
                             return expression;
                         case Token.Type.Public:
-                            Access = ClassMember.Qualifier.Public;
+                            qualifier.Access = Qualifier.Type.Public;
                             break;
                         case Token.Type.Private:
-                            Access = ClassMember.Qualifier.Private;
+                            qualifier.Access = Qualifier.Type.Private;
                             break;
                         case Token.Type.Protected:
-                            Access = ClassMember.Qualifier.Protected;
+                            qualifier.Access = Qualifier.Type.Protected;
                             break;
                         case Token.Type.Static:
-                            Static = ClassMember.Qualifier.Static;
-                            break;
-                        case Token.Type.Const:
-                            Const = ClassMember.Qualifier.Const;
+                            qualifier.Static = Qualifier.Type.Static;
                             break;
                         case Token.Type.Async:
-                            Async = ClassMember.Qualifier.Async;
+                            qualifier.Async = Qualifier.Type.Async;
                             break;
                         case Token.Type.Let:
                             var let = ParseStatement;
@@ -64,17 +62,12 @@ namespace Parsing
                             {
                                 expression.Fields.Add(new ClassMember(let)
                                 {
-                                    Access = Access,
-                                    Static = Static,
-                                    Const = Const,
-                                    Async = Async,
+                                    Access = qualifier.Access,
+                                    Static = qualifier.Static,
+                                    Async = qualifier.Async,
                                 });
                             }
-
-                            Access = ClassMember.Qualifier.Private;
-                            Static = ClassMember.Qualifier.None;
-                            Const = ClassMember.Qualifier.None;
-                            Async = ClassMember.Qualifier.None;
+                            qualifier = Qualifier.Reset;
                             Next(4);
                             continue;
                         case Token.Type.Function:
@@ -83,17 +76,12 @@ namespace Parsing
                             {
                                 expression.Methods.Add(new ClassMember(fn)
                                 {
-                                    Access = Access,
-                                    Static = Static,
-                                    Const = Const,
-                                    Async = Async,
+                                    Access = qualifier.Access,
+                                    Static = qualifier.Static,
+                                    Async = qualifier.Async,
                                 });
                             }
-
-                            Access = ClassMember.Qualifier.Private;
-                            Static = ClassMember.Qualifier.None;
-                            Const = ClassMember.Qualifier.None;
-                            Async = ClassMember.Qualifier.None;
+                            qualifier = Qualifier.Reset;
                             continue;
                     }
                     Next();

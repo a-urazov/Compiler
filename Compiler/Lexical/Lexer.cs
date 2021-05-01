@@ -36,7 +36,8 @@ namespace Compiler
         /// <param name="contidion">Additional condition for character skiping</param>
         private void Skip(bool contidion = false)
         {
-            while (char.IsWhiteSpace(Char) && contidion) Next();
+            if (contidion) while (char.IsWhiteSpace(Char) && contidion) Next();
+            while (char.IsWhiteSpace(Char)) Next();
         }
 
         /// <summary>
