@@ -14,6 +14,6 @@ namespace AST
         {
         }
 
-        public override string Source() => $"{Expression.Source()};";
+        public override string Source => $"{Expression.Source};";
     }
 }

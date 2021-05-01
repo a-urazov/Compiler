@@ -9,7 +9,7 @@ namespace AST
         /// </summary>
         public new enum Type
         {
-            Array, Cortege, Single
+            Single, Array, Cortege
         }
 
         protected Statement(Token token) : base(token)
@@ -20,6 +20,6 @@ namespace AST
         /// Return source
         /// </summary>
         /// <returns>Source</returns>
-        public override string Source() => Literal;
+        public override string Source => Literal;
     }
 }

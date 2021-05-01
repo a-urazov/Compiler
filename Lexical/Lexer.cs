@@ -8,57 +8,8 @@ namespace Compiler
     /// <summary>
     /// Lexer
     /// </summary>
-    public sealed class Lexer
+    public sealed partial class Lexer
     {
-        /// <summary>
-        /// Literal reader types
-        /// </summary>
-        private enum Reader { String, Number, Identifier, Literal }
-
-        /// <summary>
-        /// Charater type comparator
-        /// </summary>
-        private struct Comparator
-        {
-            /// <summary>
-            /// Character under scope
-            /// </summary>
-            private char Char { get; }
-
-            /// <summary>
-            /// Charater type comparator contructor
-            /// </summary>
-            /// <param name="c">Char to needs detect type</param>
-            public Comparator(char c) { Char = c; }
-
-            /// <summary>
-            /// Check is character digit
-            /// </summary>
-            public bool Digit { get => char.IsDigit(Char); }
-
-            /// <summary>
-            /// Check is character letter
-            /// </summary>
-            public bool Letter { get => char.IsLetter(Char) || Char == '_'; }
-
-            /// <summary>
-            /// Check is character symbolic operator
-            /// </summary>
-            public bool Operator { get => !Letter && !Digit && !char.IsWhiteSpace(Char) && !Block && Char != char.MinValue; }
-
-            /// <summary>
-            /// Check is string begin
-            /// </summary>
-            public bool String { get => Char == '"' || Char == '\''; }
-
-            /// <summary>
-            /// Detect is char block begin or end
-            /// </summary>
-            public bool Block { get => Char == '{' || Char == '(' || Char == '[' || Char == ']' || Char == ')' || Char == '}'; }
-
-            public bool SignedDigit(char next) => Char == '-' && char.IsDigit(next);
-        }
-
         /// <summary>
         /// Source code of program
         /// </summary>
@@ -85,7 +36,7 @@ namespace Compiler
         /// <param name="contidion">Additional condition for character skiping</param>
         private void Skip(bool contidion = false)
         {
-            while (char.IsWhiteSpace(Char) || contidion) Next();
+            while (char.IsWhiteSpace(Char) && contidion) Next();
         }
 
         /// <summary>
@@ -93,7 +44,7 @@ namespace Compiler
         /// </summary>
         private void Next()
         {
-            Char = Peek();
+            Char = Peek;
             Position = ReadPosition;
             ++ReadPosition;
         }
@@ -111,14 +62,14 @@ namespace Compiler
         /// Peek next char without replace current char
         /// </summary>
         /// <returns></returns>
-        private char Peek() => ReadPosition >= Source.Length ? char.MinValue : Source[ReadPosition];
+        private char Peek => ReadPosition >= Source.Length ? char.MinValue : Source[ReadPosition];
 
         /// <summary>
         /// Peek for passed steps count
         /// </summary>
         /// <param name="step">Steps count</param>
         /// <returns></returns>
-        private string Peek(int step) => ReadPosition >= Source.Length ? "" : Source[ReadPosition..(ReadPosition + step)];
+        private char PeekOn(int step = 1) => ReadPosition >= Source.Length ? char.MinValue : Source[ReadPosition + step - 1];
 
         /// <summary>
         /// Current character type comparator
@@ -138,17 +89,14 @@ namespace Compiler
             switch (type)
             {
                 case Reader.String:
-                    while (true)
-                    {
-                        Next(); // Fill string for condition downside
-                        if (Is(Char).String || Char == char.MinValue) break;
-                    }
+                    do Next(); // Fill string for condition downside
+                    while (!Is(Char).String && Char != char.MinValue);
                     break;
                 case Reader.Number:
                     if (Char == '-') Next(); // Skip sign
                     if (Char == '0')
                     {
-                        switch (Peek())
+                        switch (Peek)
                         {
                             case 'b':
                             case 'x':
@@ -219,7 +167,7 @@ namespace Compiler
                     case Token.Type.Minus:
                         Tokens.Add(literal, F(() =>
                         {
-                            if (Char == '-' && Is(Peek()).Digit) return new Token(Token.Type.Number, Read(Reader.Number));
+                            if (Char == '-' && Is(Peek).Digit) return new Token(Token.Type.Number, Read(Reader.Number));
                             return new Token(Token.Type.Minus, literal);
                         }));
                         continue;
@@ -276,54 +224,57 @@ namespace Compiler
         /// Switch cursor to next token
         /// </summary>
         /// <returns>Token</returns>
-        public Token NextToken()
+        public Token NextToken
         {
-            // Skip all whitespaces after current character
-            Skip();
-
-            // If end of source code we simply return
-            if (Char == char.MinValue) return new Token(Token.Type.EndOfFile, char.MinValue);
-
-            StringBuilder literal = new();
-            string key;
-
-            // If is letter than is exactly identifier
-            if (Is(Char).Letter)
+            get
             {
-                literal.Append(Read(Reader.Identifier));
+                // Skip all whitespaces after current character
+                Skip();
+
+                // If end of source code we simply return
+                if (Char == char.MinValue) return new Token(Token.Type.EndOfFile, char.MinValue);
+
+                StringBuilder literal = new();
+                string key;
+
+                // If is letter than is exactly identifier
+                if (Is(Char).Letter)
+                {
+                    literal.Append(Read(Reader.Identifier));
+                    key = literal.ToString();
+                    var type = Keyword.Tokens.ContainsKey(key)
+                        ? Keyword.Tokens[key]
+                        : Token.Type.Identifier;
+                    return new Token(type, type != Token.Type.Identifier ? Keyword.Literals[type] : key);
+                }
+                // Char is digit then is exactly a number
+                if (Is(Char).Digit) return new Token(Token.Type.Number, Read(Reader.Number));
+
+                // Otherwise is one of the binary or unary operators
+                var character = Char.ToString(); // Save value of start character for operator
+
+                // Is string make string
+                if (Is(Char).String) return Make(character);
+
+                // If block make token and skip it for cursor
+                if (Is(Char).Block) return Make(character, Skip(1));
+
+                // Fill operator behaind it will not end as token
+                while (Is(Char).Operator)
+                {
+                    var next = Peek;
+                    if (Is(Char).SignedDigit(next)) break; // hack for signed digit
+                    literal.Append(Read(Reader.Literal));
+                    if (!Is(next).Operator) break;
+                    Next();
+                }
+
+                // Complete to write operator token literal
                 key = literal.ToString();
-                var type = Keyword.Tokens.ContainsKey(key)
-                    ? Keyword.Tokens[key]
-                    : Token.Type.Identifier;
-                return new Token(type, type != Token.Type.Identifier ? Keyword.Literals[type] : key);
+
+                // Return operator or illegal token
+                return Make(key != "" ? key : character);
             }
-            // Char is digit then is exactly a number
-            if (Is(Char).Digit) return new Token(Token.Type.Number, Read(Reader.Number));
-
-            // Otherwise is one of the binary or unary operators
-            var character = Char.ToString(); // Save value of start character for operator
-
-            // Is string make string
-            if (Is(Char).String) return Make(character);
-
-            // If block make token and skip it for cursor
-            if (Is(Char).Block) return Make(character, Skip(1));
-
-            // Fill operator behaind it will not end as token
-            while (Is(Char).Operator)
-            {
-                var next = Peek();
-                if (Is(Char).SignedDigit(next)) break; // hack for signed digit
-                literal.Append(Read(Reader.Literal));
-                if (!Is(next).Operator) break;
-                Next();
-            }
-
-            // Complete to write operator token literal
-            key = literal.ToString();
-
-            // Return operator or illegal token
-            return Make(key != "" ? key : character);
         }
 
         /// <summary>

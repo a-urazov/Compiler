@@ -14,7 +14,7 @@ namespace Tokenizer
         /// <typeparam name="TValue">Value type</typeparam>
         /// <param name="source">Map</param>
         /// <returns>Reversed map of keys and values range</returns>
-        private static Dictionary<TValue, TKey> Reverse<TKey, TValue>(this IDictionary<TKey, TValue> source)
+        private static IDictionary<TValue, TKey> Reverse<TKey, TValue>(this IDictionary<TKey, TValue> source)
         {
             var dictionary = new Dictionary<TValue, TKey>();
             foreach (var entry in source) if (!dictionary.ContainsKey(entry.Value)) dictionary.Add(entry.Value, entry.Key);
@@ -24,7 +24,7 @@ namespace Tokenizer
         /// <summary>
         /// Tokens as string literal keywords
         /// </summary>
-        public static Dictionary<Token.Type, string> Literals { get; } = new()
+        public static IDictionary<Token.Type, string> Literals { get; } = new Dictionary<Token.Type, string>()
         {
             { Token.Type.Let, "let" },
             { Token.Type.Const, "const" },
@@ -75,6 +75,6 @@ namespace Tokenizer
         /// <summary>
         /// Keywords as token types
         /// </summary>
-        public static Dictionary<string, Token.Type> Tokens { get; } = Literals.Reverse();
+        public static IDictionary<string, Token.Type> Tokens { get; } = Literals.Reverse();
     }
 }

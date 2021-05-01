@@ -25,7 +25,7 @@ namespace AST
 
         public Dictionary<Identifier, Expression> Values { get; set; } = new();
 
-        public Statement.Type TypeOf { get; set; } = Statement.Type.Single;
+        public Type TypeOf { get; set; }
 
         /// <summary>
         /// Constructor - let <identifier> = <expression>;
@@ -35,16 +35,16 @@ namespace AST
         {
         }
 
-        private string Open => TypeOf == Statement.Type.Array ? "[" : (TypeOf == Statement.Type.Cortege ? "(" : "");
-        private string Close => TypeOf == Statement.Type.Array ? "]" : (TypeOf == Statement.Type.Cortege ? ")" : "");
+        private string Open => TypeOf == Type.Array ? Keyword.Literals[Token.Type.LeftBracket] : (TypeOf == Type.Cortege ? Keyword.Literals[Token.Type.LeftParen] : "");
+        private string Close => TypeOf == Type.Array ? Keyword.Literals[Token.Type.RightBracket] : (TypeOf == Type.Cortege ? Keyword.Literals[Token.Type.RightParen] : "");
 
         /// <summary>
         /// Original constructed source of token by tokens
         /// </summary>
         /// <returns>Source view</returns>
-        public override string Source() => IsMany() 
-            ? $"{Literal} {Open}{string.Join(", ", Names.Select(x => x.Source()))}{Close} = {Open}{string.Join(", ", Values.Select(x => x.Value.Source()))}{Close};" 
-            : $"{Literal} {Name.Value} = {Value.Source()};";
+        public override string Source => IsMany()
+            ? $"{Literal} {Open}{string.Join(", ", Names.Select(x => x.Source))}{Close} = {Open}{string.Join(", ", Values.Select(x => x.Value.Source))}{Close};"
+            : $"{Literal} {Name.Value} = {Value.Source};";
 
         private bool IsMany() => 
             (Value == null && Name == null && Names.Count != 0 && Values.Count == Names.Count) ||

@@ -9,6 +9,6 @@ namespace AST
         {
         }
 
-        public override string Source() => Literal;
+        public override string Source => Literal;
     }
 }

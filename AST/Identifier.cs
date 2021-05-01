@@ -10,7 +10,7 @@ namespace AST
         /// <summary>
         /// Value of identifier
         /// </summary>
-        public string Value { get; private set; }
+        public string Value { get; }
 
         /// <summary>
         /// Constructor
@@ -18,7 +18,9 @@ namespace AST
         /// <param name="token">Token</param>
         public Identifier(Token token) : base(token)
         {
-            Value = token.Literal;
+            Value = Source;
         }
+
+        public override string Source => Value;
     }
 }

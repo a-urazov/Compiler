@@ -11,6 +11,6 @@ namespace AST
         {
         }
 
-        public override string Source() => $"{Literal}{Expression.Source()}";
+        public override string Source => $"{Literal}{Expression.Source}";
     }
 }

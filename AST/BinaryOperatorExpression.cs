@@ -12,6 +12,6 @@ namespace AST
         {
         }
 
-        public override string Source() => $"{LeftExpression.Source()} {Literal} {RightExpression.Source()}";
+        public override string Source => $"{LeftExpression.Source} {Literal} {RightExpression.Source}";
     }
 }

@@ -14,11 +14,6 @@ namespace AST
         protected string Literal => Token.Literal;
         protected Token.Type Type => Token.T;
 
-        public abstract string Source();
-    }
-
-    public interface INode
-    {
-        string Source();
+        public abstract string Source { get; }
     }
 }
