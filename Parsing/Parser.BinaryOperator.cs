@@ -30,27 +30,5 @@ namespace Parsing
                 return expression;
             };
         }
-
-        /// <summary>
-        /// Parse binary operator expression
-        /// </summary>
-        /// <param name="type">Type of binary operation</param>
-        /// <returns>Expression with binary operator</returns>
-        private Func<Expression> ParseBinaryOperatorStatement(Token.Type type)
-        {
-            return () =>
-            {
-                if (PeekedToken == type) Next();
-                else return null;
-
-                var expression = new BinaryOperatorExpression(CurrentToken);
-
-                Next();
-
-                expression.RightExpression = ParseExpression();
-
-                return expression;
-            };
-        }
     }
 }

@@ -7,7 +7,6 @@ namespace Tokenizer
     /// </summary>
     public sealed partial class Token
     {
-
         /// <summary>
         /// Type of token
         /// </summary>

@@ -12,7 +12,7 @@ namespace AST
         /// <summary>
         /// List of program statements
         /// </summary>
-        private IList<Statement> Statements { get; set; } = new List<Statement>();
+        private IList<Statement> Statements { get; } = new List<Statement>();
 
         /// <summary>
         /// Add new statement to program

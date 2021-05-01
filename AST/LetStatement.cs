@@ -46,7 +46,7 @@ namespace AST
             ? $"{Literal} {Open}{string.Join(", ", Names.Select(x => x.Source))}{Close} = {Open}{string.Join(", ", Values.Select(x => x.Value.Source))}{Close};"
             : $"{Literal} {Name.Value} = {Value.Source};";
 
-        private bool IsMany() => 
+        private bool IsMany() =>
             (Value == null && Name == null && Names.Count != 0 && Values.Count == Names.Count) ||
             (Value != null && Name == null && Names.Count != 0 && Values.Count == 0);
     }
